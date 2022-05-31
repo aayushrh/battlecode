@@ -7,7 +7,9 @@ pygame.init()
 fps = 60
 fpsClock = pygame.time.Clock()
 
-width, height = 1280, 620
+TDIMS = 8
+
+width, height = 1270, 620
 screen = pygame.display.set_mode((width, height))
 
 WHITE = (255, 255, 255)
@@ -16,15 +18,15 @@ BLACK = (0, 0, 0)
 class Block(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.rect = pygame.Rect((x, y), (32, 32))
-        self.image = pygame.Surface((32, 32))
+        self.rect = pygame.Rect((x, y), (TDIMS, TDIMS))
+        self.image = pygame.Surface((TDIMS, TDIMS))
         self.image.fill(WHITE)
 
 class Thingy(pygame.sprite.Sprite):
     def __init__(self, x, y, att, defe, minsped, spawner):
         super().__init__()
-        self.rect = pygame.Rect((x, y), (32, 32))
-        self.image = pygame.Surface((32, 32))
+        self.rect = pygame.Rect((x, y), (TDIMS, TDIMS))
+        self.image = pygame.Surface((TDIMS, TDIMS))
         self.image.fill(spawner.team)
         self.hp = defe
         self.att = att
@@ -33,7 +35,7 @@ class Thingy(pygame.sprite.Sprite):
         self.spawner = spawner
 
     def attack(self, enemy):
-        if self.eneegy > 0 and math.dist((self.rect.centerx, self.rect.centery), (enemy.rect.centerx, enemy.rect.centery)) <= 32:
+        if self.eneegy > 0 and math.dist((self.rect.centerx, self.rect.centery), (enemy.rect.centerx, enemy.rect.centery)) <= TDIMS:
             enemy.hp -= 1
             self.eneegy -= 1
             self.cooldown = 10
@@ -41,7 +43,6 @@ class Thingy(pygame.sprite.Sprite):
                 enemy.kill()
 
     def truup(self, block_group, echar_group):
-        self.cooldown -= 1
         if self.eneegy <= 2:
             self.eneegy += 1
         keys = pygame.sprite.spritecollide(self, block_group, False)
@@ -69,16 +70,16 @@ class Thingy(pygame.sprite.Sprite):
                 self.move_down()
 
     def move_up(self):
-        self.rect.y -= 32
+        self.rect.y -= TDIMS
 
     def move_left(self):
-        self.rect.x -= 32
+        self.rect.x -= TDIMS
 
     def move_right(self):
-        self.rect.x += 32
+        self.rect.x += TDIMS
 
     def move_down(self):
-        self.rect.y += 32
+        self.rect.y += TDIMS
 
     def mine(self, block):
         if self.eneegy > 0 and math.dist((self.rect.centerx, self.rect.centery),(block.rect.centerx, block.rect.centery)) <= 16:
@@ -91,17 +92,17 @@ class Thingy(pygame.sprite.Sprite):
 class Spawner(pygame.sprite.Sprite):
     def __init__(self, x, y, team):
         super().__init__()
-        self.rect = pygame.Rect((x, y), (64, 32))
-        self.image = pygame.Surface((64, 32))
+        self.rect = pygame.Rect((x, y), (TDIMS*2, TDIMS*2))
+        self.image = pygame.Surface((TDIMS*2, TDIMS*2))
         self.image.fill(team)
-        self.eneegy = 0
+        self.eneegy = 2
         self.team = team
 
     def update(self, char_groupb, char_groupr):
         if self.team == (255, 0, 0):
             pass
         else:
-            self.spawn_att(char_groupb)
+            #code here
 
     def spawn_att(self, char_group):
         if self.eneegy > 0:
@@ -126,6 +127,8 @@ class Att(Thingy):
         super().__init__(x, y, 50, 10, 10, spawner)
     def update(self, block_group, echar_group):
         self.truup(block_group, echar_group)
+        if self.spawner.team == (0, 0, 255):
+            #code here 
 
 
 class Def(Thingy):
@@ -133,6 +136,8 @@ class Def(Thingy):
         super().__init__(x, y, 10, 50, 10, spawner)
     def update(self, block_group, echar_group):
         self.truup(block_group, echar_group)
+        if self.spawner.team == (0, 0, 255):
+            # code here 
 
 
 class Min(Thingy):
@@ -140,24 +145,25 @@ class Min(Thingy):
         super().__init__(x, y, 10, 10, 50, spawner)
     def update(self, block_group, echar_group):
         self.truup(block_group, echar_group)
+        if self.spawner.team == (0, 0, 255):
+            # code here 
 
 def main():
-    # Game loop.
     block_group = pygame.sprite.Group()
     spawner_group = pygame.sprite.Group()
     char_groupb = pygame.sprite.Group()
     char_groupr = pygame.sprite.Group()
-    spawner1 = Spawner(width - 128, height - 128 - 16, (0, 0, 255))
-    spawner2 = Spawner(width - 128, height - 192 - 16, (0, 0, 255))
-    spawner3 = Spawner(64, 64, (255, 0, 0))
-    spawner4 = Spawner(64, 128 , (255, 0, 0))
+    spawner1 = Spawner(width - TDIMS*4, height - TDIMS*4 + TDIMS, (0, 0, 255))
+    spawner2 = Spawner(width - TDIMS*4, height - TDIMS*4 - TDIMS*2, (0, 0, 255))
+    spawner3 = Spawner(TDIMS * 2, TDIMS*2, (255, 0, 0))
+    spawner4 = Spawner(TDIMS*2, TDIMS*4 + TDIMS, (255, 0, 0))
     spawner_group.add(spawner1)
     spawner_group.add(spawner2)
     spawner_group.add(spawner3)
     spawner_group.add(spawner4)
-    for i in range(0, width, 32):
-        for j in range(0, height, 32):
-            if random.randint(1, 25) == 1:
+    for i in range(0, width, TDIMS):
+        for j in range(0, height, TDIMS):
+            if random.randint(1, 100) == 1:
                 new_block = Block(i, j)
                 block_group.add(new_block)
     while True:
